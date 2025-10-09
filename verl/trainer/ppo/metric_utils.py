@@ -111,6 +111,8 @@ def compute_data_metrics(batch: DataProto, use_critic: bool = True) -> dict[str,
 
     prompt_mask = batch.batch["attention_mask"][:, :-max_response_length].bool()
     response_mask = batch.batch["response_mask"].bool()
+    if "special_mask" in batch.batch:
+        response_mask = batch.batch["special_mask"].bool()
 
     max_prompt_length = prompt_mask.size(-1)
 
@@ -140,6 +142,7 @@ def compute_data_metrics(batch: DataProto, use_critic: bool = True) -> dict[str,
         valid_values = torch.masked_select(values, response_mask)
         return_diff_var = torch.var(valid_returns - valid_values)
         return_var = torch.var(valid_returns)
+        initial_values = values[:, 0]
 
     # Aborted samples and non-aborted response length statistics
     # response_length_non_aborted/*: statistics computed on non-aborted samples only
@@ -181,6 +184,10 @@ def compute_data_metrics(batch: DataProto, use_critic: bool = True) -> dict[str,
                 "critic/values/min": torch.min(valid_values).detach().item(),
                 # vf explained var
                 "critic/vf_explained_var": (1.0 - return_diff_var / (return_var + 1e-5)).detach().item(),
+                # initial values
+                "critic/initial_values/mean": torch.mean(initial_values).detach().item(),
+                "critic/initial_values/max": torch.max(initial_values).detach().item(),
+                "critic/initial_values/min": torch.min(initial_values).detach().item(),
             }
             if use_critic
             else {}

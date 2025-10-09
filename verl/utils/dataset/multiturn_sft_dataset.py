@@ -67,6 +67,7 @@ class MultiTurnSFTDataset(Dataset):
         # Get messages_key from the new multiturn config structure
         multiturn_config = config.get("multiturn", {})
         self.messages_key = multiturn_config.get("messages_key", "messages")
+        self.continue_final_message_key = multiturn_config.get("continue_final_message_key", "continue_final_message")
         self.tools_key = multiturn_config.get("tools_key", "tools")
         self.enable_thinking_key = multiturn_config.get("enable_thinking_key", "enable_thinking")
         self.apply_chat_template_kwargs = config.get("apply_chat_template_kwargs", {})
@@ -104,6 +105,8 @@ class MultiTurnSFTDataset(Dataset):
 
         # Extract messages list from dataframe
         self.messages = self.dataframe[self.messages_key].apply(series_to_item).tolist()
+        # Extract continue_final_message list from dataframe
+        self.continue_final_message = self.dataframe[self.continue_final_message_key].tolist()
 
         # Extract tools list from dataframe
         if self.tools_key in self.dataframe.columns:
@@ -125,6 +128,7 @@ class MultiTurnSFTDataset(Dataset):
         start_idx: int,
         end_idx: int,
         is_assistant: bool = False,
+        continue_final_message: bool = False,
         enable_thinking: Optional[bool] = None,
         tools: Optional[list[dict[str, Any]]] = None,
     ) -> tuple[list[int], list[int], list[int]]:
@@ -167,6 +171,7 @@ class MultiTurnSFTDataset(Dataset):
             messages[:end_idx],
             tokenize=False,
             add_generation_prompt=False,
+            continue_final_message=continue_final_message,
             enable_thinking=enable_thinking,
             tools=tools,
             **self.apply_chat_template_kwargs,
@@ -242,6 +247,7 @@ class MultiTurnSFTDataset(Dataset):
     def __getitem__(self, item):
         tokenizer = self.tokenizer
         messages = self.messages[item]
+        continue_final_message = self.continue_final_message[item]
         tools = self.tools[item] if self.tools is not None else None
         enable_thinking = self.enable_thinking[item] if self.enable_thinking is not None else None
 
@@ -253,13 +259,14 @@ class MultiTurnSFTDataset(Dataset):
                 tokenize=True,
                 return_tensors="pt",
                 add_generation_prompt=False,
+                continue_final_message=continue_final_message,
                 enable_thinking=enable_thinking,
                 **self.apply_chat_template_kwargs,
             )
         except Exception as e:
             logging.error(
-                f"Error applying chat template: {e}\nMessages: {messages}\nTools: {tools}\nEnable thinking: "
-                f"{enable_thinking}"
+                f"Error applying chat template: {e}\nMessages: {messages}\nContinue final message: "
+                f"{continue_final_message}\nTools: {tools}\nEnable thinking: {enable_thinking}"
             )
             raise
 
@@ -274,7 +281,13 @@ class MultiTurnSFTDataset(Dataset):
             if cur_messages["role"] == "assistant":
                 # Process assistant message
                 tokens, loss_mask, attention_mask = self._process_message_tokens(
-                    messages, i, i + 1, is_assistant=True, enable_thinking=enable_thinking, tools=tools
+                    messages,
+                    i,
+                    i + 1,
+                    is_assistant=True,
+                    continue_final_message=continue_final_message and i == len(messages) - 1,
+                    enable_thinking=enable_thinking,
+                    tools=tools,
                 )
                 i += 1
             elif cur_messages["role"] == "tool":

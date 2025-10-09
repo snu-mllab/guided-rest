@@ -1,0 +1,36 @@
+# base
+project_name: countdown
+model_name: ???
+temperature: 1.0
+iteration: 0
+split: train
+start: 0
+num_examples: 10000
+seed: 0
+
+# directory
+data_dir: data/${project_name}/rl
+model_dir: checkpoints/${project_name}/${model_name}/huggingface
+output_dir: checkpoints/${project_name}/${model_name}/gen/temp_${temperature}/iter_${iteration}
+
+# dataset
+dataset:
+  path: parquet
+  data_dir: ${data_dir}
+  data_files: ${split}.parquet
+  split: train
+
+# llm
+llm:
+  model: ${model_dir}
+  tensor_parallel_size: 1
+  seed: ${seed}
+  gpu_memory_utilization: 0.9
+  max_model_len: 5120
+
+# sampling params
+sampling_params:
+  temperature: ${temperature}
+  top_p: 1.0
+  top_k: -1
+  max_tokens: 4096

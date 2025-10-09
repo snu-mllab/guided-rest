@@ -380,6 +380,9 @@ class DataParallelPPOActor(BasePPOActor):
                 "and is not currently supported in Server mode (agent loop)."
             )
             select_keys.append("rollout_log_probs")
+        if self.config.policy_loss.get("loss_mode", "vanilla") == "hppo":
+            assert "special_mask" in data.batch.keys()
+            select_keys.append("special_mask")
 
         has_multi_modal_inputs = "multi_modal_inputs" in data.non_tensor_batch.keys()
         non_tensor_select_keys = ["multi_modal_inputs"] if has_multi_modal_inputs else []
@@ -435,6 +438,12 @@ class DataParallelPPOActor(BasePPOActor):
                         old_log_prob = log_prob.detach()
                     else:
                         old_log_prob = model_inputs["old_log_probs"]
+
+                    log_prob = log_prob * response_mask
+                    old_log_prob = old_log_prob * response_mask
+
+                    if "special_mask" in model_inputs:
+                        response_mask = model_inputs["special_mask"]
 
                     loss_mode = self.config.policy_loss.get("loss_mode", "vanilla")
                     # vanilla -> verl.trainer.ppo.core_algos.compute_policy_loss_vanilla

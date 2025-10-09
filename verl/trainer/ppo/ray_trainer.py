@@ -34,6 +34,7 @@ from omegaconf import OmegaConf, open_dict
 from torch.utils.data import Dataset, Sampler
 from torchdata.stateful_dataloader import StatefulDataLoader
 from tqdm import tqdm
+from transformers import PreTrainedTokenizer
 
 from verl import DataProto
 from verl.experimental.dataset.sampler import AbstractCurriculumSampler
@@ -178,6 +179,19 @@ def compute_response_mask(data: DataProto):
     return attention_mask[:, -response_length:]
 
 
+def compute_special_mask(data: DataProto, tokenizer: PreTrainedTokenizer, special_token_id: int = 198) -> torch.Tensor:
+    input_ids = data.batch["input_ids"]
+    response_mask = data.batch["response_mask"]
+    response_length = response_mask.size(1)
+    input_ids = input_ids[:, -response_length - 1 : -1]
+    special_token = tokenizer.convert_ids_to_tokens(special_token_id)
+    input_tokens = [tokenizer.convert_ids_to_tokens(ids) for ids in input_ids]
+    special_mask = [[1 if special_token in token else 0 for token in tokens] for tokens in input_tokens]
+    special_mask = torch.tensor(special_mask, device=response_mask.device)
+    special_mask = special_mask * response_mask
+    return special_mask
+
+
 def compute_advantage(
     data: DataProto,
     adv_estimator: AdvantageEstimator,
@@ -226,6 +240,16 @@ def compute_advantage(
                 config.pf_ppo.get("reweight_method"),
                 config.pf_ppo.get("weight_pow"),
             )
+    elif adv_estimator == AdvantageEstimator.HGAE:
+        advantages, returns = core_algos.compute_hgae_advantage_return(
+            token_level_rewards=data.batch["token_level_rewards"],
+            values=data.batch["values"],
+            response_mask=data.batch["special_mask"],
+            gamma=gamma,
+            lam=lam,
+        )
+        data.batch["advantages"] = advantages
+        data.batch["returns"] = returns
     elif adv_estimator == AdvantageEstimator.GRPO:
         # Initialize the mask for GRPO calculation
         grpo_calculation_mask = data.batch["response_mask"]
@@ -1111,6 +1135,9 @@ class RayPPOTrainer:
                         norm_adv_by_std_in_grpo = self.config.algorithm.get(
                             "norm_adv_by_std_in_grpo", True
                         )  # GRPO adv normalization factor
+
+                        if self.config.algorithm.adv_estimator == AdvantageEstimator.HGAE:
+                            batch.batch["special_mask"] = compute_special_mask(batch, self.tokenizer)
 
                         batch = compute_advantage(
                             batch,

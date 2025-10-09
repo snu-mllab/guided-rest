@@ -1,0 +1,14 @@
+# base
+project_name: countdown
+model_name: ???
+
+# directory
+model_dir: checkpoints/${project_name}/${model_name}
+
+# merger
+merger_config:
+  operation: merge
+  backend: fsdp
+  target_dir: ${model_dir}/huggingface
+  local_dir: ${model_dir}
+  hf_model_config_path: ${model_dir}/huggingface
