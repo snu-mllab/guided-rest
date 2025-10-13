@@ -17,7 +17,6 @@ from typing import Any
 
 import torch
 
-from recipe.countdown.core_algos import get_subgoal_nodes
 from verl import DataProto
 from verl.utils.reward_score import default_compute_score
 from verl.workers.reward_manager import register
@@ -103,15 +102,6 @@ class NaiveRewardManager(AbstractRewardManager):
                 reward = score
 
             reward_tensor[i, valid_response_length - 1] = reward
-
-            # subgoal reward
-            # subgoal_nodes = get_subgoal_nodes(response_str, extra_info)
-            # for node in subgoal_nodes:
-            #     expl_end = node.expl_end
-            #     subgoal_str = response_str[:expl_end]
-            #     subgoal_ids = self.tokenizer.encode(subgoal_str, add_special_tokens=False)
-            #     subgoal_length = len(subgoal_ids)
-            #     reward_tensor[i, subgoal_length - 1] = 0.5
 
             if data_source not in already_print_data_sources:
                 already_print_data_sources[data_source] = 0
