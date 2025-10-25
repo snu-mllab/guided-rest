@@ -68,8 +68,8 @@ class Batch:
     ground_truths: list[str]
     solutions: list[str]
     responses: list[list[dict[str, str]]]
-    observations: list[dict[str, Any]]
     scores: list[float]
+    observations: list[dict[str, Any]]
     dones: list[bool]
 
     def __len__(self):
@@ -141,8 +141,12 @@ def get_user_prompt(observation: dict[str, Any], question: str) -> str:
         return USER_PROMPT_FAILED.format(formatted_tests=formatted_tests)
 
 
-def append_solution(user_prompt: str, solution: str) -> str:
-    return USER_PROMPT_SOLUTION.format(user_prompt=user_prompt, solution=solution)
+def get_user_message(observation: dict[str, Any], question: str, solution: str | None = None) -> list[dict[str, str]]:
+    user_prompt = get_user_prompt(observation, question)
+    if solution is not None:
+        user_prompt = USER_PROMPT_SOLUTION.format(user_prompt=user_prompt, solution=solution)
+    user_message = [{"role": "user", "content": user_prompt}]
+    return user_message
 
 
 def get_sequence_length(message: list[dict[str, str]], tokenizer: AnyTokenizer) -> int:
@@ -168,13 +172,10 @@ def chat(batch: Batch, llm: LLM, tokenizer: AnyTokenizer, config: DictConfig, tu
         if batch.dones[i]:
             continue
         response = batch.responses[i][: 2 * turn - 1]
-        if turn > 0:
-            if not response:
-                continue
-            user_prompt = get_user_prompt(batch.observations[i], batch.questions[i])
-            if use_solution:
-                user_prompt = append_solution(user_prompt, batch.solutions[i])
-            response += [{"role": "user", "content": user_prompt}]
+        if turn > 0 and response:
+            solution = batch.solutions[i] if use_solution else None
+            user_message = get_user_message(batch.observations[i], batch.questions[i], solution)
+            response += user_message
         response_length = get_response_length(batch.prompts[i], response, tokenizer)
         if response_length >= config.max_response_length:
             continue
@@ -195,23 +196,23 @@ def chat(batch: Batch, llm: LLM, tokenizer: AnyTokenizer, config: DictConfig, tu
     # get responses
     for i, output in zip(indices, outputs):
         response = batch.responses[i][: 2 * turn - 1]
-        if turn > 0:
-            user_prompt = get_user_prompt(batch.observations[i], batch.questions[i])
-            if use_solution:
-                user_prompt = append_solution(user_prompt, DUMMY_SOLUTION)
-            response += [{"role": "user", "content": user_prompt}]
+        if turn > 0 and response:
+            solution = DUMMY_SOLUTION if use_solution else None
+            user_message = get_user_message(batch.observations[i], batch.questions[i], solution)
+            response += user_message
         llm_solution = output.outputs[0].text
-        response += [{"role": "assistant", "content": llm_solution}]
+        assistant_message = [{"role": "assistant", "content": llm_solution}]
+        response += assistant_message
         response_length = get_response_length(batch.prompts[i], response, tokenizer)
         if response_length >= config.max_response_length:
             continue
         reward = rllm_reward_fn_code(batch.data_sources[i], llm_solution, batch.ground_truths[i])
-        observation = reward.metadata
         score = reward.reward
+        observation = reward.metadata
         done = is_done(observation, batch.questions[i])
         batch.responses[i] = response
-        batch.observations[i] = observation
         batch.scores[i] = score
+        batch.observations[i] = observation
         batch.dones[i] = done
 
 

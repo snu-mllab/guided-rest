@@ -54,7 +54,7 @@ def main(config: DictConfig):
         score = example["score"]
         index = example["extra_info"]["index"]
         for budget in budgets:
-            accuracy = 1.0 if score == 1.0 and response_length <= budget else 0.0
+            accuracy = 1.0 if score > 0.0 and response_length <= budget else 0.0
             accuracies[index][budget].append(accuracy)
 
     # compute pass@k
