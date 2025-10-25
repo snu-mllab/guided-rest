@@ -172,7 +172,7 @@ def chat(batch: Batch, llm: LLM, tokenizer: AnyTokenizer, config: DictConfig, tu
         if batch.dones[i]:
             continue
         response = batch.responses[i][: 2 * turn - 1]
-        if turn > 0 and response:
+        if response:
             solution = batch.solutions[i] if use_solution else None
             user_message = get_user_message(batch.observations[i], batch.questions[i], solution)
             response += user_message
@@ -196,7 +196,7 @@ def chat(batch: Batch, llm: LLM, tokenizer: AnyTokenizer, config: DictConfig, tu
     # get responses
     for i, output in zip(indices, outputs):
         response = batch.responses[i][: 2 * turn - 1]
-        if turn > 0 and response:
+        if response:
             solution = DUMMY_SOLUTION if use_solution else None
             user_message = get_user_message(batch.observations[i], batch.questions[i], solution)
             response += user_message
