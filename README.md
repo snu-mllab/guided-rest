@@ -14,7 +14,7 @@ pip install uv
 uv pip install vllm[flashinfer] --torch-backend=cu128
 
 # verl
-uv pip install -e .[gpu,math] --no-build-isolation --torch-backend=cu128
+uv pip install -e .[gpu] --no-build-isolation --torch-backend=cu128
 
 # fix packages
 uv pip uninstall pynvml

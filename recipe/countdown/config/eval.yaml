@@ -2,12 +2,12 @@
 project_name: countdown
 model_name: ???
 temperature: 1.0
-iteration: 0
+num_iters: 0
 split: train
 
 # directory
-data_dir: checkpoints/${project_name}/${model_name}/gen/temp_${temperature}/iter_${iteration}
-output_dir: checkpoints/${project_name}/${model_name}/eval/temp_${temperature}/iter_${iteration}
+data_dir: checkpoints/${project_name}/${model_name}/gen/temp_${temperature}/iter_${num_iters}
+output_dir: checkpoints/${project_name}/${model_name}/eval/temp_${temperature}/iter_${num_iters}
 
 # dataset
 dataset:

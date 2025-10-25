@@ -106,8 +106,12 @@ class MultiTurnSFTDataset(Dataset):
 
         # Extract messages list from dataframe
         self.messages = self.dataframe[self.messages_key].apply(series_to_item).tolist()
+
         # Extract continue_final_message list from dataframe
-        self.continue_final_message = self.dataframe[self.continue_final_message_key].tolist()
+        if self.continue_final_message_key in self.dataframe.columns:
+            self.continue_final_message = self.dataframe[self.continue_final_message_key].tolist()
+        else:
+            self.continue_final_message = None
 
         # Extract tools list from dataframe
         if self.tools_key in self.dataframe.columns:
@@ -248,7 +252,7 @@ class MultiTurnSFTDataset(Dataset):
     def __getitem__(self, item):
         tokenizer = self.tokenizer
         messages = self.messages[item]
-        continue_final_message = self.continue_final_message[item]
+        continue_final_message = self.continue_final_message[item] if self.continue_final_message is not None else False
         tools = self.tools[item] if self.tools is not None else None
         enable_thinking = self.enable_thinking[item] if self.enable_thinking is not None else None
 

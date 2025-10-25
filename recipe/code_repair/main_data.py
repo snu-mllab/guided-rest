@@ -35,7 +35,7 @@ def main(config: DictConfig):
     def process_fn(example: dict[str, Any]) -> dict[str, Any]:
         prompt = example["prompt"]
         response = example["response"]
-        message = prompt + [{"role": "assistant", "content": response}]
+        message = prompt + response
         example = {"messages": message}
         return example
 
