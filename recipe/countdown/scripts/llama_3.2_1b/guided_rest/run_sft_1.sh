@@ -1,7 +1,7 @@
 set -x
 
 train_path=checkpoints/countdown/llama_3.2_1b_base_sft/global_step_3906/data/temp_1.0/iter_3/train.parquet
-valid_path=checkpoints/countdown/llama_3.2_1b_base_sft/global_step_3906/data/temp_1.0/iter_3/valid.parquet
+valid_path=checkpoints/countdown/llama_3.2_1b_base_sft/global_step_3906/data/temp_1.0/iter_3/validation.parquet
 model_path=checkpoints/countdown/llama_3.2_1b_base_sft/global_step_3906/huggingface
 
 torchrun --standalone --nnodes=1 --nproc_per_node=4 \

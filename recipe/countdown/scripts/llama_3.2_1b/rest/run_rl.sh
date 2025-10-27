@@ -1,7 +1,7 @@
 set -x
 
 train_path=data/countdown/rl/train.parquet
-valid_path=data/countdown/rl/valid.parquet
+valid_path=data/countdown/rl/validation.parquet
 model_path=checkpoints/countdown/llama_3.2_1b_rest_sft_3/global_step_1437/huggingface
 
 python3 -m verl.trainer.main_ppo \
