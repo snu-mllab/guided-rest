@@ -63,7 +63,7 @@ sh recipe/countdown/scripts/llama_3.2_1b/guided_rest/run_rl.sh
 sh recipe/countdown/scripts/run_merge.sh model_name=llama_3.2_1b_guided_rest_rl/global_step_390/actor
 ```
 
-7. Run evaluation
+7 Run evaluation (greedy)
 ```bash
 # Generate trajectories
 sh recipe/countdown/scripts/run_gen.sh model_name=llama_3.2_1b_guided_rest_rl/global_step_390/actor temperature=0.0 num_iters=0 split=test_seen start=0 num_examples=10000
@@ -72,4 +72,15 @@ sh recipe/countdown/scripts/run_gen.sh model_name=llama_3.2_1b_guided_rest_rl/gl
 # Compute accuracy
 sh recipe/countdown/scripts/run_eval.sh model_name=llama_3.2_1b_guided_rest_rl/global_step_390/actor temperature=0.0 num_iters=0 split=test_seen
 sh recipe/countdown/scripts/run_eval.sh model_name=llama_3.2_1b_guided_rest_rl/global_step_390/actor temperature=0.0 num_iters=0 split=test_unseeen
+```
+
+8 Run evaluation (pass@k)
+```bash
+# Generate trajectories
+sh recipe/countdown/scripts/run_gen.sh model_name=llama_3.2_1b_guided_rest_rl/global_step_390/actor temperature=1.0 num_iters=0 split=test_seen start=0 num_examples=10000
+sh recipe/countdown/scripts/run_gen.sh model_name=llama_3.2_1b_guided_rest_rl/global_step_390/actor temperature=1.0 num_iters=0 split=test_unseen start=0 num_examples=10000
+
+# Compute accuracy
+sh recipe/countdown/scripts/run_eval.sh model_name=llama_3.2_1b_guided_rest_rl/global_step_390/actor temperature=1.0 num_iters=0 split=test_seen
+sh recipe/countdown/scripts/run_eval.sh model_name=llama_3.2_1b_guided_rest_rl/global_step_390/actor temperature=1.0 num_iters=0 split=test_unseeen
 ```
