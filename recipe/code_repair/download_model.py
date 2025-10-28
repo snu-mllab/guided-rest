@@ -12,18 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 
 def main():
     # Download the model
-    model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", dtype=torch.bfloat16)
-    model.save_pretrained("checkpoints/countdown/llama_3.2_1b/huggingface")
+    model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen2.5-7B-Instruct", dtype=torch.bfloat16)
+    model.save_pretrained("checkpoints/code_repair/qwen.2.5_7b/huggingface")
 
     # Download the tokenizer
-    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
-    tokenizer.save_pretrained("checkpoints/countdown/llama_3.2_1b/huggingface")
+    tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-7B-Instruct")
+    tokenizer.save_pretrained("checkpoints/code_repair/qwen.2.5_7b/huggingface")
 
 
 if __name__ == "__main__":

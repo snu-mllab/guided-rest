@@ -17,16 +17,24 @@ from datasets import load_dataset
 
 def main():
     # download sft dataset
-    sft_datasets = load_dataset("symoon11/countdown-sft")
-    for split in sft_datasets.keys():
-        sft_dataset = sft_datasets[split]
-        sft_dataset.to_parquet(f"data/countdown/sft/{split}.parquet")
+    sft_train_dataset = load_dataset("symoon11/countdown-sft", split="train")
+    sft_valid_dataset = load_dataset("symoon11/countdown-sft", split="validation")
+
+    # save sft dataset
+    sft_train_dataset.to_parquet(f"data/countdown/sft/train.parquet")
+    sft_valid_dataset.to_parquet(f"data/countdown/sft/valid.parquet")
 
     # download rl dataset
-    rl_datasets = load_dataset("symoon11/countdown-rl")
-    for split in rl_datasets.keys():
-        rl_dataset = rl_datasets[split]
-        rl_dataset.to_parquet(f"data/countdown/rl/{split}.parquet")
+    rl_train_dataset = load_dataset("symoon11/countdown-rl", split="train")
+    rl_valid_dataset = load_dataset("symoon11/countdown-rl", split="validation")
+    rl_test_seen_dataset = load_dataset("symoon11/countdown-rl", split="test_seen")
+    rl_test_unseen_dataset = load_dataset("symoon11/countdown-rl", split="test_unseen")
+
+    # save rl dataset
+    rl_train_dataset.to_parquet(f"data/countdown/rl/train.parquet")
+    rl_valid_dataset.to_parquet(f"data/countdown/rl/valid.parquet")
+    rl_test_seen_dataset.to_parquet(f"data/countdown/rl/test_seen.parquet")
+    rl_test_unseen_dataset.to_parquet(f"data/countdown/rl/test_unseen.parquet")
 
 
 if __name__ == "__main__":
