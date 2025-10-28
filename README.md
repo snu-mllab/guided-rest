@@ -1,7 +1,8 @@
-## Learning to Better Search with Language Models via Guided Reinforced Self-Training (NeurIPS 2025)
+# Guided-ReST
 
+This is the code for the paper [Learning to Better Search with Language Models via Guided Reinforced Self-Training](https://arxiv.org/abs/2410.02992) accepted to NeurIPS 2025.
 
-### Setup
+## Setup
 
 ```bash
 # conda
@@ -21,7 +22,7 @@ uv pip install -e .[gpu] --no-build-isolation --torch-backend=cu128
 uv pip uninstall pynvml
 ```
 
-### Countdown
+## Countdown
 
 1. Download the SFT and RL datasets
 ```bash
@@ -88,7 +89,7 @@ sh recipe/countdown/scripts/run_eval.sh model_name=llama_3.2_1b_guided_rest_rl/g
 sh recipe/countdown/scripts/run_eval.sh model_name=llama_3.2_1b_guided_rest_rl/global_step_390/actor temperature=1.0 num_iters=0 split=test_unseen
 ```
 
-### Code self-repair
+## Code self-repair
 
 1. Download the SFT and RL datasets
 ```bash
@@ -121,10 +122,27 @@ sh recipe/code_repair/scripts/run_merge.sh model_name=qwen2.5_7b_guided_rest_sft
 
 ```bash
 # Generate trajectories with seeds from 0 to 128
-sh recipe/code_repair/scripts/run_gen.sh model_name=qwen2.5_7b_guided_rest_sft_3/global_step_348 temperature=1.0 num_turns=4 num_iters=0 split=test_cc start=0 num_examples=200 seed=[seed]
-sh recipe/code_repair/scripts/run_gen.sh model_name=qwen2.5_7b_guided_rest_sft_3/global_step_348 temperature=1.0 num_turns=4 num_iters=0 split=test_cf start=0 num_examples=500 seed=[seed]
+sh recipe/code_repair/scripts/run_gen.sh model_name=qwen2.5_7b_guided_rest_sft_3/global_step_618 temperature=1.0 num_turns=4 num_iters=0 split=test_cc start=0 num_examples=200 seed=[seed]
+sh recipe/code_repair/scripts/run_gen.sh model_name=qwen2.5_7b_guided_rest_sft_3/global_step_618 temperature=1.0 num_turns=4 num_iters=0 split=test_cf start=0 num_examples=500 seed=[seed]
 
 # Compute accuracy
-sh recipe/code_repair/scripts/run_eval.sh model_name=qwen2.5_7b_guided_rest_sft_3/global_step_348 temperature=1.0 num_turns=4 num_iters=0 split=test_cc
-sh recipe/code_repair/scripts/run_eval.sh model_name=qwen2.5_7b_guided_rest_sft_3/global_step_348 temperature=1.0 num_turns=4 num_iters=0 split=test_cf
+sh recipe/code_repair/scripts/run_eval.sh model_name=qwen2.5_7b_guided_rest_sft_3/global_step_618 temperature=1.0 num_turns=4 num_iters=0 split=test_cc
+sh recipe/code_repair/scripts/run_eval.sh model_name=qwen2.5_7b_guided_rest_sft_3/global_step_618 temperature=1.0 num_turns=4 num_iters=0 split=test_cf
+```
+
+## Note
+
+- We recommend generating trajectories in parallel across multiple GPUs.
+
+## Citation
+
+If you find this code useful, please consider citing this work.
+
+```bibtex
+@inproceedings{moon2025learning,
+    title={Learning to Better Search with Language Models via Guided Reinforced Self-Training},
+    author={Seungyong Moon and Bumsoo Park and Hyun Oh Song},
+    booktitle={Neural Information Processing Systems},
+    year={2025}
+}
 ```
