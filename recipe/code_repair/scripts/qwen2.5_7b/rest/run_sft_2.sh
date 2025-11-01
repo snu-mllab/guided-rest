@@ -9,7 +9,7 @@ torchrun --standalone --nnodes=1 --nproc_per_node=4 \
     data.train_files=${train_path} \
     data.val_files=${valid_path} \
     data.train_batch_size=256 \
-    data.micro_batch_size_per_gpu=8 \
+    data.micro_batch_size_per_gpu=16 \
     data.multiturn.enable=True \
     data.multiturn.messages_key=messages \
     data.max_length=18432 \

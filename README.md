@@ -103,9 +103,9 @@ python -m recipe.code_repair.download_model
 
 3. Run Guided-ReST
 ```bash
-# Generate trajectories 
-sh recipe/code_repair/scripts/run_gen.sh model_name=qwen2.5_7b temperature=1.0 num_turns=4 num_iters=3 split=train start=0 num_examples=16000
-sh recipe/code_repair/scripts/run_gen.sh model_name=qwen2.5_7b temperature=1.0 num_turns=4 num_iters=3 split=valid start=0 num_examples=300
+# Generate trajectories with seeds 0 to 8
+sh recipe/code_repair/scripts/run_gen.sh model_name=qwen2.5_7b temperature=1.0 num_turns=4 num_iters=3 split=train start=0 num_examples=16000 seed=[seed]
+sh recipe/code_repair/scripts/run_gen.sh model_name=qwen2.5_7b temperature=1.0 num_turns=4 num_iters=3 split=valid start=0 num_examples=300 seed=[seed]
 
 # Prepare data
 sh recipe/code_repair/scripts/run_data.sh model_name=qwen2.5_7b temperature=1.0 num_iters=3 split=train

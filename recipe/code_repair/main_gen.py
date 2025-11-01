@@ -174,7 +174,7 @@ def chat(batch: Batch, llm: LLM, tokenizer: AnyTokenizer, config: DictConfig, tu
         response = batch.responses[i][: 2 * turn - 1]
         if response:
             solution = batch.solutions[i] if use_solution else None
-            user_message = get_user_message(batch.observations[i], batch.questions[i], solution)
+            user_message = get_user_message(batch.observations[i], batch.questions[i], solution=solution)
             response += user_message
         response_length = get_response_length(batch.prompts[i], response, tokenizer)
         if response_length >= config.max_response_length:
@@ -198,7 +198,7 @@ def chat(batch: Batch, llm: LLM, tokenizer: AnyTokenizer, config: DictConfig, tu
         response = batch.responses[i][: 2 * turn - 1]
         if response:
             solution = DUMMY_SOLUTION if use_solution else None
-            user_message = get_user_message(batch.observations[i], batch.questions[i], solution)
+            user_message = get_user_message(batch.observations[i], batch.questions[i], solution=solution)
             response += user_message
         llm_solution = output.outputs[0].text
         assistant_message = [{"role": "assistant", "content": llm_solution}]
